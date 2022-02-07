@@ -1,0 +1,47 @@
+name: Build & Release
+on:
+  # Enable manual run
+  workflow_dispatch:
+  # Verify builds succeed on pull requests
+  pull_request:
+  # Build & deploy for tag events matching v*, i.e. v1.0.0, v20.15.10
+  push:
+    tags:
+      - "v*"
+
+env:
+  project-name: "MoveWindows"
+
+jobs:
+  create-build:
+    name: Create Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Package for Pling store
+        run: |
+          tar czf ${{ env.project-name }}.tar.gz *
+
+      # ---------------------------------- Upload ---------------------------------- #
+      # Upload artifacts to draft release.
+      - name: Upload artifacts to draft release
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          prerelease: false
+          fail_on_unmatched_files: false
+          name: ${{ github.ref_name }}
+          files: |
+            ${{ env.project-name }}.tar.gz
+
+      - name: Upload artifacts to workflow if not for tag / release
+        if: |
+          github.event_name == 'pull_request' || 
+          github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.project-name }}-artifacts
+          path: ${{ env.project-name }}.tar.gz
