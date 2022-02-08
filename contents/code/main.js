@@ -1,12 +1,13 @@
 const Position = Object.freeze({
-    TopLeft: Symbol("top-left"), /**< North-West corner of the screen. */
-    TopCenter: Symbol("top-center"), /**< North centered portion of the screen. */
-    TopRight: Symbol("top-right"), /**< North-East corner of the screen. */
-    CenterRight: Symbol("center-right"), /**< East centered portion of the screen. */
-    BottomRight: Symbol("bottom-right"), /**< South-East corner of the screen. */
-    BottomCenter: Symbol("bottom-center"), /**< South centered portion of the screen. */
-    BottomLeft: Symbol("bottom-left"), /**< South-West corner of the screen. */
-    CenterLeft: Symbol("center-left"), /**< West centered portion of the screen. */
+    Center: Symbol("center"), /** Center of the screen. */
+    TopLeft: Symbol("top-left"), /** North-West corner of the screen. */
+    TopCenter: Symbol("top-center"), /** North centered portion of the screen. */
+    TopRight: Symbol("top-right"), /** North-East corner of the screen. */
+    CenterRight: Symbol("center-right"), /** East centered portion of the screen. */
+    BottomRight: Symbol("bottom-right"), /** South-East corner of the screen. */
+    BottomCenter: Symbol("bottom-center"), /** South centered portion of the screen. */
+    BottomLeft: Symbol("bottom-left"), /** South-West corner of the screen. */
+    CenterLeft: Symbol("center-left"), /** West centered portion of the screen. */
 });
 
 function moveWindow(client, position) {
@@ -19,6 +20,10 @@ function moveWindow(client, position) {
     var positionY;
 
     switch (position) {
+        case Position.Center:
+            positionX = areaCenterX - (clientGeometry.width / 2);
+            positionY = areaCenterY - (clientGeometry.height / 2);
+            break;
         case Position.TopLeft:
             positionX = area.left;
             positionY = area.top;
@@ -78,6 +83,10 @@ function runScript(position) {
         workspace.sendClientToScreen(client, intendedScreen);
     }
 }
+
+registerShortcut("Move Window to the Center", "Move Window to the Center", "Meta+Num+5", function () {
+    runScript(Position.Center);
+});
 
 registerShortcut("Move Window to the Top-Left", "Move Window to the Top-Left", "Meta+Num+7", function () {
     runScript(Position.TopLeft);

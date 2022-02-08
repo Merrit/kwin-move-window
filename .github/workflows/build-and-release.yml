@@ -10,7 +10,7 @@ on:
       - "v*"
 
 env:
-  project-name: "MoveWindows"
+  project-name: "movewindow"
 
 jobs:
   create-build:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Package for Pling store
         run: |
-          tar czf ${{ env.project-name }}.tar.gz *
+          tar cf ${{ env.project-name }}.kwinscript *
 
       # ---------------------------------- Upload ---------------------------------- #
       # Upload artifacts to draft release.
@@ -35,7 +35,7 @@ jobs:
           fail_on_unmatched_files: false
           name: ${{ github.ref_name }}
           files: |
-            ${{ env.project-name }}.tar.gz
+            ${{ env.project-name }}.kwinscript
 
       - name: Upload artifacts to workflow if not for tag / release
         if: |
@@ -44,4 +44,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.project-name }}-artifacts
-          path: ${{ env.project-name }}.tar.gz
+          path: ${{ env.project-name }}.kwinscript
