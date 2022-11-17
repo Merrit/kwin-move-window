@@ -59,8 +59,8 @@ function moveWindow(client, position) {
     }
 
     client.frameGeometry = {
-        x: positionX,
-        y: positionY,
+        x: Math.round(positionX),
+        y: Math.round(positionY),
         height: clientGeometry.height,
         width: clientGeometry.width,
     }
