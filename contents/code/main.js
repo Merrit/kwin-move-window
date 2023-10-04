@@ -1,3 +1,11 @@
+/**
+ * An enumeration of the possible positions to move a window to.
+ * 
+ * The available positions are the eight cardinal and intercardinal 
+ * directions on the screen.
+ * 
+ * The positions are relative to the screen, not the window.
+ */
 const Position = Object.freeze({
     Center: Symbol("center"), /** Center of the screen. */
     TopLeft: Symbol("top-left"), /** North-West corner of the screen. */
@@ -10,26 +18,65 @@ const Position = Object.freeze({
     CenterLeft: Symbol("center-left"), /** West centered portion of the screen. */
 });
 
+/**
+ * Moves the window to the specified position on the screen.
+ * @param {Client} client The window to move.
+ * @param {Position} position The position to move the window to.
+ * @returns {void}
+ */
 function moveWindow(client, position) {
-    var clientGeometry = client.frameGeometry;
-    var area = workspace.clientArea(KWin.MaximizeArea, client);
-    var areaCenterX = area.width / 2;
-    var areaCenterY = area.height / 2;
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    print(`Beginning window move to ${position.toString()}.`);
+    
+    /** @type {Rect} */
+    var clientGeometry = new Rect(
+        client.geometry.x,
+        client.geometry.y,
+        client.geometry.width,
+        client.geometry.height,
+        client.geometry.x,
+        client.geometry.x + client.geometry.width,
+        client.geometry.y,
+        client.geometry.y + client.geometry.height
+    );
 
+    var kwinClientArea = workspace.clientArea(KWin.MaximizeArea, client);
+
+    /** @type {Rect} */
+    var area = new Rect(
+        kwinClientArea.x,
+        kwinClientArea.y,
+        kwinClientArea.width,
+        kwinClientArea.height,
+        kwinClientArea.left,
+        kwinClientArea.right,
+        kwinClientArea.top,
+        kwinClientArea.bottom
+    );
+
+    print("clientGeometry: " + clientGeometry.toString());
+    print("area: " + area.toString());
+    print("areaCenterX: " + area.centerX);
+    print("areaCenterY: " + area.centerY);
+    print("clientCenterX: " + clientGeometry.centerX);
+    print("clientCenterY: " + clientGeometry.centerY);
+
+    /** @type {number} */
     var positionX;
+    /** @type {number} */
     var positionY;
 
     switch (position) {
         case Position.Center:
-            positionX = areaCenterX - (clientGeometry.width / 2);
-            positionY = areaCenterY - (clientGeometry.height / 2);
+            positionX = area.centerX - (clientGeometry.width / 2);
+            positionY = area.centerY - (clientGeometry.height / 2);
             break;
         case Position.TopLeft:
             positionX = area.left;
             positionY = area.top;
             break;
         case Position.TopCenter:
-            positionX = areaCenterX - (clientGeometry.width / 2);
+            positionX = area.centerX - (clientGeometry.width / 2);
             positionY = area.top;
             break;
         case Position.TopRight:
@@ -38,14 +85,14 @@ function moveWindow(client, position) {
             break;
         case Position.CenterRight:
             positionX = area.right - clientGeometry.width;
-            positionY = areaCenterY - (clientGeometry.height / 2);
+            positionY = area.centerY - (clientGeometry.height / 2);
             break;
         case Position.BottomRight:
             positionX = area.right - clientGeometry.width;
             positionY = area.bottom - clientGeometry.height;
             break;
         case Position.BottomCenter:
-            positionX = areaCenterX - (clientGeometry.width / 2);
+            positionX = area.centerX - (clientGeometry.width / 2);
             positionY = area.bottom - clientGeometry.height;
             break;
         case Position.BottomLeft:
@@ -54,17 +101,59 @@ function moveWindow(client, position) {
             break;
         case Position.CenterLeft:
             positionX = area.left;
-            positionY = areaCenterY - (clientGeometry.height / 2);
+            positionY = area.centerY - (clientGeometry.height / 2);
             break;
     }
+
+    print("positionX: " + positionX);
+    print("positionY: " + positionY);
 
     client.frameGeometry = {
         x: Math.round(positionX),
         y: Math.round(positionY),
         height: clientGeometry.height,
         width: clientGeometry.width,
+    };
+}
+
+/* 
+    * A rectangle with the following properties:
+    * x: The x coordinate of the top-left corner of the client area.
+    * y: The y coordinate of the top-left corner of the client area.
+    * width: The width of the client area.
+    * height: The height of the client area.
+    * left: The x coordinate of the left edge of the client area.
+    * right: The x coordinate of the right edge of the client area.
+    * top: The y coordinate of the top edge of the client area.
+    * bottom: The y coordinate of the bottom edge of the client area.
+*/
+class Rect {
+    constructor(x, y, width, height, left, right, top, bottom) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.left = left;
+        this.right = right;
+        this.top = top;
+        this.bottom = bottom;
     }
-};
+
+    /* Returns a pretty json string representation of the rectangle. */
+    toString() {
+        return JSON.stringify(this, null, 2);
+    }
+
+    /* Returns the x coordinate of the center of the rectangle. */
+    get centerX() {
+        return this.x + (this.width / 2);
+    }
+
+    /* Returns the y coordinate of the center of the rectangle. */
+    get centerY() {
+        return this.y + (this.height / 2);
+    }
+}
 
 function runScript(position) {
     var client = workspace.activeClient;
@@ -82,6 +171,23 @@ function runScript(position) {
         moveWindow(client, position);
         workspace.sendClientToScreen(client, intendedScreen);
     }
+}
+
+/**
+ * Prints a message to the console.
+ * 
+ * Other print methods are not showing up, so we are using console.info.
+ * 
+ * We are including a prefix to make it easier to find the messages.
+ * 
+ * Monitor output with:
+ * $ journalctl -g "move-window:" -f
+ * 
+ * @param {string} message The message to print.
+ * @returns {void}
+ */
+function print(message) {
+    console.info("move-window: " + message);
 }
 
 registerShortcut("Move Window to the Center", "Move Window to the Center", "Meta+Num+5", function () {
