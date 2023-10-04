@@ -2,7 +2,7 @@
  * An enumeration of the possible positions to move a window to.
  * 
  * The available positions are the eight cardinal and intercardinal 
- * directions on the screen.
+ * directions on the screen, plus the center of the screen.
  * 
  * The positions are relative to the screen, not the window.
  */
