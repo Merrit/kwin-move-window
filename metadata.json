@@ -1,0 +1,20 @@
+{
+    "KPlugin": {
+        "Name": "Move Window",
+        "Description": "KWin script to move the active window with keyboard shortcuts",
+        "Icon": "preferences-system-windows",
+        "Authors": [
+            {
+                "Email": "kmcwilliampublic@gmail.com",
+                "Name": "Kristen McWilliam"
+            }
+        ],
+        "Id": "movewindow",
+        "Version": "1.1.0",
+        "License": "GPLv3",
+        "Website": "https://github.com/Merrit/kwin-move-window"
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "code/main.js",
+    "KPackageStructure": "KWin/Script"
+}

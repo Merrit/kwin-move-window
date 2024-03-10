@@ -20,27 +20,27 @@ const Position = Object.freeze({
 
 /**
  * Moves the window to the specified position on the screen.
- * @param {Client} client The window to move.
+ * @param {Window} window The window to move.
  * @param {Position} position The position to move the window to.
  * @returns {void}
  */
-function moveWindow(client, position) {
+function moveWindow(window, position) {
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     print(`Beginning window move to ${position.toString()}.`);
-    
+
     /** @type {Rect} */
     var clientGeometry = new Rect(
-        client.geometry.x,
-        client.geometry.y,
-        client.geometry.width,
-        client.geometry.height,
-        client.geometry.x,
-        client.geometry.x + client.geometry.width,
-        client.geometry.y,
-        client.geometry.y + client.geometry.height
+        window.size.x,
+        window.size.y,
+        window.size.width,
+        window.size.height,
+        window.size.x,
+        window.size.x + window.size.width,
+        window.size.y,
+        window.size.y + window.size.height
     );
 
-    var kwinClientArea = workspace.clientArea(KWin.MaximizeArea, client);
+    var kwinClientArea = workspace.clientArea(KWin.MaximizeArea, window);
 
     /** @type {Rect} */
     var area = new Rect(
@@ -108,7 +108,7 @@ function moveWindow(client, position) {
     print("positionX: " + positionX);
     print("positionY: " + positionY);
 
-    client.frameGeometry = {
+    window.frameGeometry = {
         x: Math.round(positionX),
         y: Math.round(positionY),
         height: clientGeometry.height,
@@ -156,20 +156,20 @@ class Rect {
 }
 
 function runScript(position) {
-    var client = workspace.activeClient;
+    var window = workspace.activeWindow;
 
-    var intendedScreen = client.screen;
+    var intendedScreen = workspace.activeScreen;
 
-    moveWindow(client, position);
+    moveWindow(window, position);
 
     // There is a strange bug sometimes where moving the window to the 
     // top or bottom of the screen moves it to a different screen.
     // This works around the bug by moving the window to the correct position 
     // on whatever screen it ended up on, then moving it to the same 
     // relative position on the intended screen.
-    if (client.screen != intendedScreen) {
-        moveWindow(client, position);
-        workspace.sendClientToScreen(client, intendedScreen);
+    if (window.activeScreen != intendedScreen) {
+        moveWindow(window, position);
+        workspace.sendClientToScreen(window, intendedScreen);
     }
 }
 
