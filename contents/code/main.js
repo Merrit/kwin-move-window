@@ -25,21 +25,24 @@ const Position = Object.freeze({
  * @returns {void}
  */
 function moveWindow(window, position) {
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    print("");
+    print("~~~~~");
+    print("");
     print(`Beginning window move to ${position.toString()}.`);
 
     /** @type {Rect} */
-    var clientGeometry = new Rect(
-        window.size.x,
-        window.size.y,
-        window.size.width,
-        window.size.height,
-        window.size.x,
-        window.size.x + window.size.width,
-        window.size.y,
-        window.size.y + window.size.height
+    var windowGeometry = new Rect(
+        window.x,
+        window.y,
+        window.width,
+        window.height,
+        window.x,
+        window.x + window.width,
+        window.y,
+        window.y + window.height
     );
 
+    /** @type {QRectF} */
     var kwinClientArea = workspace.clientArea(KWin.MaximizeArea, window);
 
     /** @type {Rect} */
@@ -54,12 +57,12 @@ function moveWindow(window, position) {
         kwinClientArea.bottom
     );
 
-    print("clientGeometry: " + clientGeometry.toString());
+    print("windowGeometry: " + windowGeometry.toString());
     print("area: " + area.toString());
     print("areaCenterX: " + area.centerX);
     print("areaCenterY: " + area.centerY);
-    print("clientCenterX: " + clientGeometry.centerX);
-    print("clientCenterY: " + clientGeometry.centerY);
+    print("windowCenterX: " + windowGeometry.centerX);
+    print("windowCenterY: " + windowGeometry.centerY);
 
     /** @type {number} */
     var positionX;
@@ -68,40 +71,40 @@ function moveWindow(window, position) {
 
     switch (position) {
         case Position.Center:
-            positionX = area.centerX - (clientGeometry.width / 2);
-            positionY = area.centerY - (clientGeometry.height / 2);
+            positionX = area.centerX - (windowGeometry.width / 2);
+            positionY = area.centerY - (windowGeometry.height / 2);
             break;
         case Position.TopLeft:
             positionX = area.left;
             positionY = area.top;
             break;
         case Position.TopCenter:
-            positionX = area.centerX - (clientGeometry.width / 2);
+            positionX = area.centerX - (windowGeometry.width / 2);
             positionY = area.top;
             break;
         case Position.TopRight:
-            positionX = area.right - clientGeometry.width;
+            positionX = area.right - windowGeometry.width;
             positionY = area.top;
             break;
         case Position.CenterRight:
-            positionX = area.right - clientGeometry.width;
-            positionY = area.centerY - (clientGeometry.height / 2);
+            positionX = area.right - windowGeometry.width;
+            positionY = area.centerY - (windowGeometry.height / 2);
             break;
         case Position.BottomRight:
-            positionX = area.right - clientGeometry.width;
-            positionY = area.bottom - clientGeometry.height;
+            positionX = area.right - windowGeometry.width;
+            positionY = area.bottom - windowGeometry.height;
             break;
         case Position.BottomCenter:
-            positionX = area.centerX - (clientGeometry.width / 2);
-            positionY = area.bottom - clientGeometry.height;
+            positionX = area.centerX - (windowGeometry.width / 2);
+            positionY = area.bottom - windowGeometry.height;
             break;
         case Position.BottomLeft:
             positionX = area.left;
-            positionY = area.bottom - clientGeometry.height;
+            positionY = area.bottom - windowGeometry.height;
             break;
         case Position.CenterLeft:
             positionX = area.left;
-            positionY = area.centerY - (clientGeometry.height / 2);
+            positionY = area.centerY - (windowGeometry.height / 2);
             break;
     }
 
@@ -111,8 +114,8 @@ function moveWindow(window, position) {
     window.frameGeometry = {
         x: Math.round(positionX),
         y: Math.round(positionY),
-        height: clientGeometry.height,
-        width: clientGeometry.width,
+        height: windowGeometry.height,
+        width: windowGeometry.width,
     };
 }
 
@@ -158,19 +161,7 @@ class Rect {
 function runScript(position) {
     var window = workspace.activeWindow;
 
-    var intendedScreen = workspace.activeScreen;
-
     moveWindow(window, position);
-
-    // There is a strange bug sometimes where moving the window to the 
-    // top or bottom of the screen moves it to a different screen.
-    // This works around the bug by moving the window to the correct position 
-    // on whatever screen it ended up on, then moving it to the same 
-    // relative position on the intended screen.
-    if (window.activeScreen != intendedScreen) {
-        moveWindow(window, position);
-        workspace.sendClientToScreen(window, intendedScreen);
-    }
 }
 
 /**
